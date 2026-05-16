@@ -1,0 +1,32 @@
+name: Kundli Pathshala — Daily QA Check
+
+on:
+  schedule:
+    - cron: '30 12 * * *'  # 6:00 PM IST (12:30 UTC) every day
+  workflow_dispatch:        # allows manual trigger from GitHub Actions tab
+
+jobs:
+  daily-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r "Webinar check daily/requirements.txt"
+
+      - name: Run QA Check via Claude Code
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          mcp_config: ${{ secrets.MCP_CONFIG }}
+          prompt_file: "Webinar check daily/qa_runner.md"
+          timeout_minutes: 25
